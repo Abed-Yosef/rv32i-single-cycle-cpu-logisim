@@ -4,8 +4,7 @@ A 32-bit single-cycle CPU implementing a subset of the RISC-V RV32I instruction 
 
 ## Architecture
 
-![CPU Top-Level Datapath](cpu_top.png)
-
+![CPU Top-Level Datapath](image.png)
 The processor uses a single-cycle datapath: each instruction completes in one clock cycle.
 
 Main components:
