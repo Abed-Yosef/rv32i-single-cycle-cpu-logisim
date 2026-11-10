@@ -1,16 +1,16 @@
 module program_counter(
-هىحعف input logic [31:0] immediate,
-هىحعف input logic branch,
-هىحعف input logic zero,
-هىحعف input logic jump,
-هىحعف input logic clk,
+input logic [31:0] immediate,
+input logic branch,
+input logic zero,
+input logic jump,
+input logic clk,
 input logic reset,
 
 output logic [31:0] pc_plus_4,
 output logic [31:0] pc
 );
 
-مخلهlogic selector;
+logic selector;
 logic [31:0] result;
 
 assign selector = (branch && zero) || jump;
