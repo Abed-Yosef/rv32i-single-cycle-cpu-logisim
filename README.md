@@ -1,85 +1,101 @@
 # 32-bit RISC-V Single-Cycle CPU | Logisim & SystemVerilog
 
-A 32-bit, single-cycle CPU implementing a subset of the RISC-V RV32I instruction set. The processor was first designed and tested in **Logisim**, then implemented at the RTL level in **SystemVerilog** using **Intel Quartus Prime**. Module-level SystemVerilog testbenches were also developed.
+A 32-bit single-cycle CPU implementing a subset of the RISC-V RV32I instruction set, designed from scratch at the datapath level in Logisim and subsequently implemented in SystemVerilog RTL using Intel Quartus Prime.
 
-The goal of this project is to demonstrate a complete processor datapath, control logic, and a progression from schematic-level design to RTL implementation and verification.
+The project demonstrates processor architecture, digital logic design, RTL implementation, and functional verification through directed tests and SystemVerilog testbenches.
 
-## Architecture
+**Project Highlights**
+- 32-bit single-cycle processor architecture
+- 9 supported RV32I instructions
+- Logisim schematic implementation
+- Modular SystemVerilog RTL implementation
+- Integrated CPU top-level module
+- Directed functional testing and module-level testbenches
+
+**Project Files**
+- [Logisim CPU Design](rv32i_single_cycle_cpu.circ)
+- [SystemVerilog RTL and Testbenches](CPU-RTL/)
+
+## 1. Architecture
 
 ![CPU Top-Level Datapath](image.png)
 
-The design uses a **single-cycle datapath**: each supported instruction completes in one clock cycle, without pipelining.
+The processor uses a **single-cycle architecture**, where each supported instruction completes within one clock cycle without pipelining.
 
-### Main components
+### Main Components
 
-- **Program Counter (PC):** Maintains the instruction address and selects the next PC for sequential, branch, or jump execution.
-- **Instruction Memory:** Supplies the instruction addressed by the PC.
-- **Instruction Decoder / Splitter:** Extracts opcode, register addresses, and function fields.
-- **Register File:** 32 registers of 32 bits each, with two read ports, one write port, and `x0` fixed at zero.
-- **Immediate Generator:** Produces sign-extended immediates for I-, S-, B-, and J-type instructions.
-- **Main Control Unit:** Generates control signals from the instruction opcode.
-- **ALU Control Unit:** Selects the required ALU operation.
-- **32-bit ALU:** Performs arithmetic and logical operations and generates the comparison result needed for `BEQ`.
-- **Data Memory:** Supports load and store operations.
-- **Datapath Multiplexers:** Select the ALU's second operand and the data written back to the register file.
+| Component | Description |
+|---|---|
+| Program Counter | Maintains the current instruction address and determines the next PC |
+| Instruction Memory | Supplies the instruction addressed by the PC |
+| Instruction Decoder | Extracts opcode, register addresses, and function fields |
+| Register File | 32 × 32-bit registers with two read ports and one write port; x0 is fixed at zero |
+| Immediate Generator | Generates 32-bit sign-extended immediate values |
+| Main Control Unit | Generates datapath control signals from the instruction opcode |
+| ALU Control Unit | Selects the required ALU operation |
+| 32-bit ALU | Performs arithmetic, logical, and comparison operations |
+| Data Memory | Handles word load and store operations |
+| Datapath Multiplexers | Select ALU operands and register write-back data |
 
-The branch/jump next-PC selection is handled as part of the Program Counter logic in the updated design.
+Branch and jump decisions are integrated into the Program Counter's next-address selection logic.
 
-## Supported Instructions
+## 2. Supported Instructions
 
-This processor supports **nine RV32I instructions**; it does not implement the complete RV32I ISA.
+The processor implements nine instructions from the RV32I instruction set.
 
-| Instruction | Format | Function |
-| --- | --- | --- |
-| `ADD` | R | `rd = rs1 + rs2` |
-| `SUB` | R | `rd = rs1 - rs2` |
-| `AND` | R | `rd = rs1 & rs2` |
-| `OR` | R | Bitwise OR of `rs1` and `rs2` |
-| `ADDI` | I | `rd = rs1 + immediate` |
-| `LW` | I | Load a 32-bit word from data memory |
-| `SW` | S | Store a 32-bit word to data memory |
-| `BEQ` | B | Branch if `rs1 == rs2` |
-| `JAL` | J | Jump and write `PC + 4` to `rd` |
+| Instruction | Format | Operation |
+|---|---|---|
+| ADD | R | rd = rs1 + rs2 |
+| SUB | R | rd = rs1 - rs2 |
+| AND | R | rd = rs1 & rs2 |
+| OR | R | rd = rs1 \| rs2 |
+| ADDI | I | rd = rs1 + immediate |
+| LW | I | Load 32-bit word from memory |
+| SW | S | Store 32-bit word to memory |
+| BEQ | B | Branch if rs1 == rs2 |
+| JAL | J | Jump and write PC + 4 to rd |
 
-## Instruction Execution
+The implementation supports this subset rather than the complete RV32I instruction set.
 
-For a sequential instruction, the next PC is:
+## 3. Instruction Execution
 
-```text
-next_pc = pc + 4
-```
+For sequential execution:
 
-For a taken `BEQ` or a `JAL`:
+`next_pc = pc + 4`
 
-```text
-next_pc = pc + sign_extended_immediate
-```
+For a taken BEQ or JAL:
 
-A `BEQ` changes the PC only when the two source registers compare equal. A `JAL` also writes the return address (`PC + 4`) to the destination register.
+`next_pc = pc + sign_extended_immediate`
 
-## SystemVerilog RTL Implementation
+A BEQ instruction updates the PC to the branch target only when the two source registers compare equal.
 
-After completing the Logisim design, the processor modules were implemented in SystemVerilog. The RTL includes a top-level CPU module that connects the datapath and control components.
+A JAL instruction changes the PC to the jump target and writes the return address (PC + 4) into the destination register.
 
-The design work covers the Program Counter, ALU, Register File, Instruction Memory, Immediate Generator, control units, and Data Memory.
+## 4. SystemVerilog RTL Implementation
 
-**Publication status:** The Logisim files are available in this repository. The SystemVerilog source files and testbenches have been developed separately and are not yet included in the published file list below. This section will be updated with file links and reproducible simulation instructions when they are uploaded.
+After completing the Logisim design, the processor was implemented at the RTL level using SystemVerilog.
 
-## Verification
+The implementation follows a modular design approach, with separate components for the ALU, Register File, Program Counter, Instruction Memory, Immediate Generator, Main Control Unit, ALU Control Unit, and Data Memory.
 
-### Logisim functional tests
+A top-level CPU module integrates the datapath and control logic.
 
-Directed programs were used to test the supported instructions. The following outcomes are reported from the Logisim verification work:
+The SystemVerilog implementation and associated testbenches are available in the [CPU-RTL directory](CPU-RTL/).
 
-| Test category | Instructions / behavior | Reported result |
-| --- | --- | --- |
-| Arithmetic | `ADD`, `SUB`, `ADDI` | Passed |
-| Logic | `AND`, `OR` | Passed |
-| Memory access | `SW`, `LW` | Passed |
-| Control flow | `BEQ`, `JAL` | Passed |
-| PC sequencing | `PC + 4`, branch and jump targets | Passed |
+## 5. Functional Verification
 
-Example arithmetic test:
+### Logisim Testing
+
+Directed instruction sequences were used to verify processor functionality.
+
+| Test Category | Instructions / Behavior | Reported Result |
+|---|---|---|
+| Arithmetic | ADD, SUB, ADDI | Passed |
+| Logic | AND, OR | Passed |
+| Memory | LW, SW | Passed |
+| Control Flow | BEQ, JAL | Passed |
+| PC Sequencing | Sequential, branch, jump | Passed |
+
+**Example: Arithmetic Test**
 
 ```assembly
 ADDI x7, x0, 10
@@ -87,7 +103,7 @@ ADDI x9, x0, 20
 ADD  x2, x7, x9
 ```
 
-Expected and observed register values in Logisim:
+Expected and observed Logisim register values:
 
 ```text
 x7 = 10
@@ -95,41 +111,68 @@ x9 = 20
 x2 = 30
 ```
 
-A separate memory test stored and then loaded the value `42` using `SW` and `LW`.
+An additional memory test stored and loaded the value 42 using SW and LW.
 
-### SystemVerilog module-level tests
+### SystemVerilog Testbenches
 
-SystemVerilog testbenches were written for individual modules. These are separate from the Logisim directed programs. Testbench source files, simulation outputs, and any end-to-end RTL results will be linked here after they are published; no unprovided RTL pass counts or coverage metrics are claimed.
+Module-level SystemVerilog testbenches were developed to exercise individual RTL components.
 
-## Running the Logisim Design
+These tests are separate from the directed instruction sequences executed in Logisim.
 
-1. Download [`rv32i_single_cycle_cpu.circ`](rv32i_single_cycle_cpu.circ).
-2. Open it with **Logisim 2.7.1**.
-3. Open the `CPU_Top` circuit.
-4. Load or edit a test program in the Instruction Memory.
-5. Select **Simulate → Reset Simulation**.
-6. Toggle the clock from `0 → 1 → 0` for each instruction.
-7. Observe the Program Counter, Register File, and Data Memory to inspect execution.
+The testbench source files are included in the [CPU-RTL directory](CPU-RTL/).
 
-> **Note:** Quartus is used for RTL development. Running SystemVerilog testbenches requires a compatible simulator; simulator commands and logs will be documented when the RTL files are published.
+Simulation pass counts, coverage metrics, and end-to-end RTL verification results are not claimed without supporting evidence.
 
-## Repository Files
+### Verification Roadmap
+
+Potential extensions include:
+
+- SystemVerilog Assertions (SVA) for architectural invariants
+- Verification of the zero register (x0)
+- Program Counter reset and sequencing properties
+- Branch and jump correctness properties
+- Formal verification of selected RTL components
+
+These are potential future extensions, not completed formal verification results.
+
+## 6. Running the Logisim Design
+
+1. Download `rv32i_single_cycle_cpu.circ`.
+2. Open the file using Logisim 2.7.1.
+3. Navigate to `CPU_Top`.
+4. Load a test program into the Instruction Memory.
+5. Reset the simulation.
+6. Toggle the clock to execute instructions.
+7. Inspect the Program Counter, Register File, and Data Memory.
+
+For RTL simulation, use a SystemVerilog-compatible simulator with the RTL and testbench files.
+
+Intel Quartus Prime was used for RTL development. No FPGA deployment is claimed.
+
+## 7. Repository Structure
 
 ```text
-README.md                    Project documentation
-image.png                    Updated CPU datapath screenshot
-rv32i_single_cycle_cpu.circ  Logisim CPU implementation
+README.md
+image.png
+rv32i_single_cycle_cpu.circ
+CPU-RTL/
+    SystemVerilog RTL source files
+    SystemVerilog testbenches
 ```
 
-## Current Limitations
+## 8. Current Limitations
 
-- Supports only the nine instructions listed above, not the full RV32I instruction set.
-- Uses a single-cycle architecture with no pipeline.
-- Does not implement caches, interrupts, or exception handling.
-- No FPGA deployment or performance/frequency claims are included in this documentation.
+- Implements nine RV32I instructions rather than the complete ISA.
+- Single-cycle architecture without pipelining.
+- No cache, interrupt, or exception handling.
+- No FPGA deployment or timing-performance claims.
+- No formal verification results or coverage metrics are currently reported.
 
-## Author
+## 9. Author
 
-**Abed Alrahman Yosef**  
-B.Sc. Electrical Engineering Student — Tel Aviv University  
+**Abed Alrahman Yosef**
+
+B.Sc. Electrical Engineering Student  
+Tel Aviv University
+
 [LinkedIn](https://www.linkedin.com/in/abed-yosef-907527209)
