@@ -3,7 +3,7 @@ input logic [31:0] instruction,
 input logic [1:0] imm_sel,
 output logic [31:0] immediate
 );
-always comb_begin
+always_comb begin
 	case (imm_sel)
 		2'b00: immediate = {{20{instruction[31]}},instruction[31:20]};
 		2'b01: immediate = {{20{instruction[31]}},instruction[31:25],instruction[11:7]};
