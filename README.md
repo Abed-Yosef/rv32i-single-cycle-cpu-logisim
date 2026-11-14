@@ -1,3 +1,4 @@
+![RV32I CPU](./cover.png)
 # 32-bit RISC-V Single-Cycle CPU | Logisim & SystemVerilog
 
 A 32-bit single-cycle CPU implementing a subset of the RISC-V RV32I instruction set, designed from scratch at the datapath level in Logisim and subsequently implemented in SystemVerilog RTL using Intel Quartus Prime.
